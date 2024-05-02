@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import { connectDb } from './config/db.js';
 import { campRoute } from './router/campRoute.js';
+import { usersRouter } from './router/usersRoute.js';
 
 dotenv.config()
 connectDb()
@@ -13,6 +14,7 @@ app.use(express())
 app.use(express.json())
 app.use("/api",campRoute)
 app.use('/generated',express.static('generated'))
+app.use('/api',usersRouter)
 
 
 

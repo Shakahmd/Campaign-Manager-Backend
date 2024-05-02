@@ -136,22 +136,26 @@ const processImage = async(imagepath)=>{
 
 // @desc upload image
 // @route POST api/camapign/upload
-const uploadImage = async(req,res,next)=>{
+const uploadImage = async(req,res)=>{
   try {
     const imageFile = req.file 
     const {title,description} = req.body
     if(!imageFile){
-     return res.status(400).send({message:"No image file found !"})
+      return  res.status(400).send({message:"No image file found !"})
      
     }
        console.log("imageFile:",imageFile)
        const  imageInfo = await  processImage(imageFile.path)
         console.log(imageInfo);
        if(!title||!description){
-        return res.status(400).send({message:"All required field must be provided !"})
+         return res.status(400).send({message:"All required field must be provided !"})
       }
+       
+      const userId = req.user
+      console.log(userId)
         
-      const ImageDetails = new campaignModel({
+      const ImageDetails =  new campaignModel({
+        createdby:userId,
         title:title,
         description:description,
         bg_image:imageFile.path,
@@ -160,24 +164,18 @@ const uploadImage = async(req,res,next)=>{
         fg_image_width:imageInfo.tpWidth
 
       })
-       
-      await ImageDetails.save()
-
-
      
-         
-         
-        
-      
-      
-      res.status(200).send({message:"image saved successfully"})
+      const savedImage = await ImageDetails.save()
+      console.log("new campaign created",savedImage)
+       
+     return res.status(200).send({message:"image saved successfully"})
 
      
          
            
   } catch (error) {
      console.error(error)
-      res.status(500).send({message:error.message})
+      return  res.status(500).send({message:error.message})
   }
    
  

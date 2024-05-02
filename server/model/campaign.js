@@ -12,6 +12,7 @@ const positionSchema = new mongoose.Schema({
 
 
 const campaignSchema =  new mongoose.Schema({
+    createdby:{type:String,required:true},
     title:{type:String,required:true},
     description:{type:String,required:true},
     bg_image:{type:String,required:true},

@@ -6,36 +6,23 @@ import jwt from 'jsonwebtoken'
 
 
 
- const auth = async(req,res,next)=>{
-    const authHeader = req.header('Authorization')
-    const token = authHeader.split(' ')[1]
-   
-    console.log(token)
+const auth = async (req, res, next) => {
+  try {
+    const authHeader = req.header('Authorization');
 
-    try {
-      if(!token){
-           res.status(401).send({message:"authorization failed"})
-      }
-      const decoded = jwt.verify(token,process.env.JWT_SECRET)
-      
-      console.log(decoded)
-     
-
-       req.user = decoded.id
-      
-       
-
-       
-       next()
-    } catch (error) {
-      console.error(error)
-           res.status(403).send({message:"Authorization failed"})
-      
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).send({ message: 'Authorization header missing or invalid' });
     }
-   
-    
 
- }
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded.id;
+    next();
+  } catch (error) {
+    console.error(error);
+    return res.status(403).send({ message: 'Authorization failed' });
+  }
+};
  
 const signupUser = async(req,res)=>{
   try {
@@ -54,7 +41,7 @@ const signupUser = async(req,res)=>{
 
         const salt = await bcrypt.genSalt(saltRounds)
         const hashpassword = await bcrypt.hash(password,salt)
-        console.log(hashpassword)
+        // console.log(hashpassword)
         
         const user =  new userModel({
             fullname:fullname,
@@ -67,7 +54,7 @@ const signupUser = async(req,res)=>{
         const token = jwt.sign({id:user._id},process.env.JWT_SECRET,{
           expiresIn:"3h"
         })
-          console.log(token)
+          // console.log(token)
 
         return res.status(200).json({message:"Details added sucessfully !",token:token})
        
@@ -113,6 +100,8 @@ const signupUser = async(req,res)=>{
     
 
   }
+
+ 
 
 
 export {

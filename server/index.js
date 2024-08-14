@@ -23,7 +23,9 @@ app.use('/generated',(req,res,next)=>{
 }, express.static('public/generated'));
 
 
-
+app.get('/',(req,res)=>{
+        res.status(201).json({message:"connected to Backend"})
+})
 
 
 

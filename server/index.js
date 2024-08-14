@@ -14,9 +14,9 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json())
 app.use(cors())
-app.use("/api",campRoute,)
-app.use('/api',usersRouter)
-app.use('/api/campaign/upload', express.static('public/uploads'));
+app.use(campRoute)
+app.use(usersRouter)
+app.use('/campaign/upload', express.static('public/uploads'));
 app.use('/generated',(req,res,next)=>{
     res.set('Content-Disposition', 'attachment')
     next()

@@ -1,4 +1,6 @@
 import express from 'express'
+import { getPixelData } from 'transparent-pixel-locator'
+
 
 import { campaignModel } from '../model/campaign.js'
 import multer from 'multer'
@@ -28,118 +30,17 @@ const multerMiddleware2 = profile.single("profilePicture")
 
 
 
-
-
-//processs image
-
-
-
-const processImageData = (pixels,width)=>{
-   
-    
-    let lowestColumn;
-    let highestColumn;
-    let lowestRow;
-    let highestRow;
-    let startingPixel = {};
-    let firstTransparentPixel = true
- 
-    
-         console.log("pixelLength",pixels.length)
-     
-      for(let i =3; i<pixels.length;i +=4){
-          
-           if(pixels[i] === 0){
-         
-            // console.log("transparentpixel worked")
-            
-            const column = Math.floor((i/4) % width);
-            // console.log("column",column)
-          
-            const row = Math.floor((i/4) / width);
-            // console.log("row",row)
-                  
-            if(firstTransparentPixel){
-              lowestColumn = column;
-              highestColumn = column;
-              lowestRow = row;
-              highestRow = row;
-
-              firstTransparentPixel = false;
-           
-
-          
-                
-
-              }else{
-                // console.log("lowestColumn",lowestColumn)
-                   
-                 if(column < lowestColumn){
-                      lowestColumn = column;     
-                 }
-               
-
-                   if(column > highestColumn){
-                       highestColumn = column;
-                   }
-
-                   if(row < lowestRow){
-                        lowestRow = row
-                   }
-
-                   if(row > highestRow){
-                       highestRow = row
-             }
-            
-
-           }      
-              
-        }   
-      
-      }
-      startingPixel = {x:lowestColumn,y:lowestRow}
-              
-      const tpWidth = highestColumn - lowestColumn +1
-      const tpHeight = highestRow - lowestRow + 1
-       
-      
-      console.log("startingPixel",startingPixel)
-       return {
-            startingPixel:startingPixel,
-            tpHeight:tpHeight,
-            tpWidth:tpWidth
-       }
-       
-}
-
-
-
-
-
-const processImage = async(imagepath)=>{
+async function processImage(imagepath) {
   try {
-
-      if(!imagepath){
-         throw new Error('No image is provided')
-      }
-
-      const{data,info} = await sharp(imagepath).raw().toBuffer({resolveWithObject: true})
-      const pixelArray = new Uint8ClampedArray(data.buffer)
-       console.log("image width",info.width)
-       console.log("image height",info.height)
-      const result = processImageData(pixelArray,info.width)
-      // console.log(result)
+      const result = await getPixelData(imagepath);
       return result
-
- 
-    
+      console.log(result);
   } catch (error) {
-    throw error
-    
+      console.error(error);
   }
-
 }
 
+;
 
 
 
@@ -196,8 +97,8 @@ const uploadImage = async(req,res)=>{
         description:description,
         bg_image:imageFile.filename,
         fg_image_position:imageInfo.startingPixel,
-        fg_image_height:imageInfo.tpHeight,
-        fg_image_width:imageInfo.tpWidth,
+        fg_image_height:imageInfo.transparentHeight,
+        fg_image_width:imageInfo.transparentWidth,
         text_position:JSON.parse(text_position),
         text_font_size:text_font_size,
         text_font_color:text_font_color,
@@ -267,7 +168,7 @@ const getActiveCampaigns = async(req,res)=>{
   }
 
   //get a single campaign for using 
-  //@route GET api/campaign/view/:id(campaignObjectId)
+  //@route GET api/campaign/view/:slug(campaignObjectId)
 
     const getSingleCampaign = async(req,res)=>{
           try {

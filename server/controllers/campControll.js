@@ -300,7 +300,7 @@ const getActiveCampaigns = async(req,res)=>{
                   
                  const image = {input:resizedProfilePicture,left:campaign.fg_image_position.x,top:campaign.fg_image_position.y,blend:'dest-over'}
                  const compositeItems = [image]
-                  let textMarkUp = ''
+                  let textMarkUp = '';
                    const textCheck = nameText ? textMarkUp = `<span foreground="${campaign.text_font_color}"size="x-large">` + nameText +`</span>`:null;
                   
                     
